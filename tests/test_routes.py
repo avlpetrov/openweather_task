@@ -8,7 +8,7 @@ from sqlalchemy import and_, select
 from starlette import status
 from starlette.responses import JSONResponse
 
-from openweather_task.database.models import items, users
+from openweather_task.database.models import items, sendings, users
 from openweather_task.main import app
 from openweather_task.schemas import (
     CreateItemResponse,
@@ -369,6 +369,243 @@ async def test_list_items(
 
         assert response.status_code == expected_response.status_code
         assert response.content == expected_response.body
+
+    finally:
+        await database.execute("TRUNCATE users CASCADE")
+
+
+@pytest.mark.parametrize(
+    "user_a, user_a_items, user_b, send_item_request, expected_status",
+    # fmt: off
+    [
+        # Sending successfully initiated.
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            {
+                "id": 2,
+                "login": "Ben",
+                "password": "sample_password",
+                "token": None,
+                "token_expiration_time": None,
+            },
+            {"id": 3, "token": "cca8568a441e4f082527908791ec3bea", "recipient": "Ben"},
+            status.HTTP_201_CREATED,
+        ),
+
+        # Sender can't send item to himself.
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            None,
+            {
+                "id": 3, "token": "cca8568a441e4f082527908791ec3bea",
+                "recipient": "Alex"
+            },
+            status.HTTP_400_BAD_REQUEST,
+        ),
+
+        # No such item to send.
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            {
+                "id": 2,
+                "login": "Ben",
+                "password": "sample_password",
+                "token": None,
+                "token_expiration_time": None,
+            },
+            {"id": 99, "token": "cca8568a441e4f082527908791ec3bea", "recipient": "Ben"},
+            status.HTTP_404_NOT_FOUND,
+        ),
+
+        # No such recipient.
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            None,
+            {"id": 3, "token": "cca8568a441e4f082527908791ec3bea", "recipient": "Ben"},
+            status.HTTP_404_NOT_FOUND,
+        ),
+    ]
+    # fmt: on
+)
+@pytest.mark.asyncio
+async def test_send_item(
+    user_a: Dict[str, str],
+    user_a_items: List[Dict[str, str]],
+    user_b: Dict[str, str],
+    send_item_request: Dict[str, str],
+    expected_status: int,
+    database: Database,
+) -> None:
+    try:
+        if user_a:
+            await database.execute(users.insert().values(**user_a))
+        if user_b:
+            await database.execute(users.insert().values(**user_b))
+        if user_a_items:
+            await database.execute_many(items.insert(), values=user_a_items)
+
+        async with TestClient(app) as client:
+            response = await client.post("/send", json=send_item_request)
+
+        assert response.status_code == expected_status
+
+    finally:
+        await database.execute("TRUNCATE users CASCADE")
+
+
+@pytest.mark.parametrize(
+    "user_a, user_a_items, user_b, item_sending, get_item_request, expected_status",
+    # fmt: off
+    [
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": None,
+                "token_expiration_time": None,
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            {
+                "id": 2,
+                "login": "Ben",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            {
+                "id": 1,
+                "item_id": 3,
+                "from_user_id": 1,
+                "to_user_id": 2,
+                "confirmation_url": "3ciaK7RvNsBgY-ehrkqZtg",
+            },
+
+            {
+                "id": 3,
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "confirmation_url": "3ciaK7RvNsBgY-ehrkqZtg",
+            },
+            status.HTTP_200_OK,
+        ),
+        (
+            None,
+            None,
+            None,
+            None,
+            {
+                "id": 3,
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "confirmation_url": "3ciaK7RvNsBgY-ehrkqZtg",
+            },
+            status.HTTP_401_UNAUTHORIZED,
+        ),
+        (
+            {
+                "id": 1,
+                "login": "Alex",
+                "password": "sample_password",
+                "token": None,
+                "token_expiration_time": None,
+            },
+            [
+                {"id": 3, "user_id": 1, "name": "item_name_3"},
+                {"id": 1, "user_id": 1, "name": "item_name_1"},
+                {"id": 2, "user_id": 1, "name": "item_name_2"},
+            ],
+            {
+                "id": 2,
+                "login": "Ben",
+                "password": "sample_password",
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "token_expiration_time": datetime.now() + timedelta(hours=1),
+            },
+            None,
+            {
+                "id": 3,
+                "token": "cca8568a441e4f082527908791ec3bea",
+                "confirmation_url": "3ciaK7RvNsBgY-ehrkqZtg",
+            },
+            status.HTTP_404_NOT_FOUND,
+        ),
+    ]
+    # fmt: on
+)
+@pytest.mark.asyncio
+async def test_get_item(
+    user_a: Dict[str, str],
+    user_a_items: List[Dict[str, str]],
+    user_b: Dict[str, str],
+    item_sending: Dict[str, str],
+    get_item_request: Dict[str, str],
+    expected_status: int,
+    database: Database,
+) -> None:
+    try:
+        if user_a:
+            await database.execute(users.insert().values(**user_a))
+        if user_a_items:
+            await database.execute_many(items.insert(), values=user_a_items)
+        if user_b:
+            await database.execute(users.insert().values(**user_b))
+        if item_sending:
+            await database.execute(sendings.insert().values(**item_sending))
+
+        async with TestClient(app) as client:
+            response = await client.get(
+                f"/get/{get_item_request['confirmation_url']}",
+                query_string=get_item_request,
+            )
+
+        assert response.status_code == expected_status
 
     finally:
         await database.execute("TRUNCATE users CASCADE")

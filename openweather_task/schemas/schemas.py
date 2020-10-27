@@ -10,6 +10,8 @@ __all__ = [
     "DeleteItemRequest",
     "DeleteItemResponse",
     "ItemSchema",
+    "SendItemRequest",
+    "SendItemResponse",
 ]
 
 
@@ -78,6 +80,22 @@ class DeleteItemResponse(BaseModel):
 class ItemSchema(BaseModel):
     id: int
     name: str
+
+    class Config:
+        orm_mode = True
+
+
+class SendItemRequest(BaseModel):
+    id: int
+    token: str
+    recipient: str
+
+    class Config:
+        orm_mode = True
+
+
+class SendItemResponse(BaseModel):
+    confirmation_url: str
 
     class Config:
         orm_mode = True
