@@ -9,17 +9,6 @@ repos:
       entry: poetry run isort
       types: [python]
 
-    - id: black
-      exclude: |
-        (?x)(
-            ^migrations/|
-        )
-      name: black
-      stages: [commit]
-      language: system
-      entry: poetry run black
-      types: [python]
-
     - id: flake8
       exclude: |
         (?x)(
