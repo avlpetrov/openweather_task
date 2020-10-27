@@ -1,5 +1,3 @@
-msg?=""
-
 clean:
 	@rm -rf build dist .eggs *.egg-info
 	@rm -rf .benchmarks .coverage coverage.xml htmlcov report.xml .tox
@@ -26,4 +24,6 @@ run:
 	@docker-compose up --build
 
 migrate:
-	@poetry run alembic upgrade head
+	@docker-compose run \
+	-e DATABASE_URI=postgresql://postgres:postgres@database:5432/postgres \
+	-e PYTHONPATH=. app alembic upgrade head
