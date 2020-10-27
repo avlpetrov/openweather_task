@@ -3,8 +3,8 @@ from starlette import status
 
 from openweather_task.database.models import UserModel
 from openweather_task.schemas import (
-    AuthorizeUserResponse,
     AuthorizeUserRequest,
+    AuthorizeUserResponse,
     RegisterUserRequest,
     RegisterUserResponse,
 )

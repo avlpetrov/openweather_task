@@ -4,14 +4,13 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 
-from openweather_task.database.models import UserModel, ItemModel
+from openweather_task.database.models import ItemModel, UserModel
 from openweather_task.schemas import (
-    CreateItemResponse,
     CreateItemRequest,
-    DeleteItemResponse,
+    CreateItemResponse,
     DeleteItemRequest,
+    DeleteItemResponse,
     Item,
-    ListItemsRequest,
 )
 
 router = APIRouter()

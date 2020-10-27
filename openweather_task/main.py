@@ -1,10 +1,10 @@
+from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 
-from openweather_task.database import database
-from fastapi import FastAPI
-
-from .routers import users, items
 from openweather_task.config import APP_NAME, DEBUG
+from openweather_task.database import database
+
+from .routers import items, users
 
 app: FastAPI = FastAPI(title=APP_NAME, debug=DEBUG)
 

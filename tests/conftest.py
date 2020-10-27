@@ -1,10 +1,10 @@
 import uuid
 from time import sleep
 
-from alembic import command
-from alembic.config import Config
 import docker as dockerlib
 import pytest
+from alembic import command
+from alembic.config import Config
 from databases import Database
 
 POSTGRES_DOCKER_IMAGE = "postgres:13"

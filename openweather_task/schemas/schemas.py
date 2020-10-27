@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 from openweather_task.database.models import Token
 
-
 __all__ = [
     "AuthorizeUserRequest",
     "AuthorizeUserResponse",
@@ -12,7 +11,6 @@ __all__ = [
     "CreateItemResponse",
     "DeleteItemRequest",
     "DeleteItemResponse",
-    "ListItemsRequest",
     "Item",
 ]
 
@@ -74,13 +72,6 @@ class DeleteItemRequest(BaseModel):
 
 class DeleteItemResponse(BaseModel):
     message: str
-
-    class Config:
-        orm_mode = True
-
-
-class ListItemsRequest(BaseModel):
-    token: str
 
     class Config:
         orm_mode = True

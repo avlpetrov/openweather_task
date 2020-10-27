@@ -1,13 +1,13 @@
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import List, Optional
 
 import sqlalchemy
 from databases.backends.postgres import Record
-from sqlalchemy import and_, ForeignKey, select
+from sqlalchemy import ForeignKey, and_, select
 from sqlalchemy.ext.declarative import declarative_base
 
-from openweather_task.config import TOKEN_TTL_SECONDS, TOKEN_BYTES_LENGTH
+from openweather_task.config import TOKEN_BYTES_LENGTH, TOKEN_TTL_SECONDS
 from openweather_task.database import database, metadata
 
 Base = declarative_base()

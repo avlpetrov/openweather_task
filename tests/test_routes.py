@@ -3,16 +3,16 @@ from typing import Dict, List
 
 import pytest
 from async_asgi_testclient import TestClient
+from databases import Database
 from sqlalchemy import and_, select
 from starlette import status
-from databases import Database
 from starlette.responses import JSONResponse
 
-from openweather_task.database.models import users, items
+from openweather_task.database.models import items, users
 from openweather_task.main import app
 from openweather_task.schemas import (
-    DeleteItemResponse,
     CreateItemResponse,
+    DeleteItemResponse,
     RegisterUserResponse,
 )
 
