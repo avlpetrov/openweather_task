@@ -191,11 +191,18 @@ class ItemModel:
         return item
 
     @classmethod
+    @database.transaction()
     async def delete(cls, item_id: int) -> Optional[int]:
         delete_item_query = (
             items.delete().where(items.c.id == item_id).returning(items.c.id)
         )
         deleted_item_id = await database.execute(delete_item_query)
+
+        delete_item_sending_query = (
+            sendings.delete().where(items.c.id == item_id).returning(items.c.id)
+        )
+        await database.execute(delete_item_sending_query)
+
         return deleted_item_id
 
     @classmethod
