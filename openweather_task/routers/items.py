@@ -34,12 +34,6 @@ router = APIRouter()
 async def create_item(request: CreateItemRequest) -> CreateItemResponse:
     user = await UserModel.get_authorized(request.token)
     if user:
-        item = await ItemModel.get(user_id=user["id"], name=request.name)
-        if item:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Item already exists"
-            )
-
         item_id = await ItemModel.create(name=request.name, user_id=user["id"])
         return CreateItemResponse(id=item_id, name=request.name, message="Item created")
 
@@ -118,7 +112,7 @@ async def send_item(request: SendItemRequest) -> SendItemResponse:
             detail="Can't send item to yourself",
         )
 
-    item = await ItemModel.get_by_id(request.id)
+    item = await ItemModel.get(request.id)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -154,7 +148,7 @@ async def get_item(id: int, confirmation_url: str, token: str) -> JSONResponse: 
             detail="Provided token is unauthorized",
         )
 
-    item = await ItemModel.get_by_id(id)
+    item = await ItemModel.get(id)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

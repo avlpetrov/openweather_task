@@ -108,16 +108,8 @@ class ItemModel:
         return item_id
 
     @classmethod
-    async def get_by_id(cls, item_id: int) -> Optional[Mapping[str, Any]]:
+    async def get(cls, item_id: int) -> Optional[Mapping[str, Any]]:
         select_item_query = items.select().where(items.c.id == item_id)
-        item = await database.fetch_one(select_item_query)
-        return item
-
-    @classmethod
-    async def get(cls, user_id: int, name: str) -> Optional[Mapping[str, Any]]:
-        select_item_query = items.select().where(
-            and_(items.c.user_id == user_id, items.c.name == name)
-        )
         item = await database.fetch_one(select_item_query)
         return item
 
