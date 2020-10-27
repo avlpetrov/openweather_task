@@ -9,7 +9,7 @@ clean:
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +
 
 format: clean
-	@poetry run black .
+	@poetry run black . --exclude migrations
 
 test:
 	@DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres \
