@@ -13,9 +13,6 @@ from openweather_task.schemas import ItemSchema
 Base = declarative_base()
 
 
-Token = str
-
-
 class User(Base):  # type: ignore
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
@@ -78,8 +75,7 @@ class UserModel:
         return bool(user)
 
     @classmethod
-    async def authorize(cls, login: str, password: str) -> Optional[Token]:
-        # TODO: Add SALT, store in encrypted format
+    async def authorize(cls, login: str, password: str) -> Optional[str]:
         token = secrets.token_hex(nbytes=TOKEN_BYTES_LENGTH)
         token_expiration_time = datetime.now() + timedelta(seconds=TOKEN_TTL_SECONDS)
 
@@ -100,7 +96,7 @@ class UserModel:
         return None
 
     @classmethod
-    async def get_authorized(cls, token: Token) -> Optional[Mapping[str, Any]]:
+    async def get_authorized(cls, token: str) -> Optional[Mapping[str, Any]]:
         select_user_query = users.select().where(
             and_(users.c.token == token, datetime.now() < users.c.token_expiration_time)
         )

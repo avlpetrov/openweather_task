@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 
-from openweather_task.database.models import Token
-
 __all__ = [
     "AuthorizeUserRequest",
     "AuthorizeUserResponse",
@@ -39,7 +37,7 @@ class AuthorizeUserRequest(BaseModel):
 
 
 class AuthorizeUserResponse(BaseModel):
-    token: Token
+    token: str
 
     class Config:
         orm_mode = True
@@ -47,7 +45,7 @@ class AuthorizeUserResponse(BaseModel):
 
 class CreateItemRequest(BaseModel):
     name: str
-    token: Token
+    token: str
 
     class Config:
         orm_mode = True
