@@ -17,7 +17,7 @@ Run migrations: ::
 
     make migrate
 
-Access API spec at http://0.0.0.0:8000/docs
+Access API spec at http://localhost:8000/docs
 
 Installation
 ------------
