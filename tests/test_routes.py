@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import pytest
 from async_asgi_testclient import TestClient
@@ -15,6 +15,8 @@ from openweather_task.schemas import (
     DeleteItemResponse,
     RegisterUserResponse,
 )
+
+JSON = Dict[str, Any]
 
 
 @pytest.mark.parametrize(
@@ -53,8 +55,8 @@ from openweather_task.schemas import (
 )
 @pytest.mark.asyncio
 async def test_register_user(
-    user: Dict[str, str],
-    register_user_request: Dict[str, str],
+    user: JSON,
+    register_user_request: JSON,
     expected_response: JSONResponse,
     database: Database,
 ) -> None:
@@ -113,8 +115,8 @@ async def test_register_user(
 )
 @pytest.mark.asyncio
 async def test_login_user(
-    user: Dict[str, str],
-    login_request: Dict[str, str],
+    user: JSON,
+    login_request: JSON,
     expected_status: int,
     database: Database,
 ) -> None:
@@ -198,8 +200,8 @@ async def test_login_user(
 )
 @pytest.mark.asyncio
 async def test_create_item(
-    user: Dict[str, str],
-    create_item_request: Dict[str, str],
+    user: JSON,
+    create_item_request: JSON,
     expected_response: JSONResponse,
     database: Database,
 ) -> None:
@@ -276,9 +278,9 @@ async def test_create_item(
 )
 @pytest.mark.asyncio
 async def test_delete_item(
-    user: Dict[str, str],
-    item: Dict[str, str],
-    delete_item_request: Dict[str, str],
+    user: JSON,
+    item: JSON,
+    delete_item_request: JSON,
     expected_response: JSONResponse,
     database: Database,
 ) -> None:
@@ -351,9 +353,9 @@ async def test_delete_item(
 )
 @pytest.mark.asyncio
 async def test_list_items(
-    user: Dict[str, str],
-    items_: List[Dict[str, str]],
-    list_items_request: Dict[str, str],
+    user: JSON,
+    items_: List[JSON],
+    list_items_request: JSON,
     expected_response: JSONResponse,
     database: Database,
 ) -> None:
@@ -473,10 +475,10 @@ async def test_list_items(
 )
 @pytest.mark.asyncio
 async def test_send_item(
-    user_a: Dict[str, str],
-    user_a_items: List[Dict[str, str]],
-    user_b: Dict[str, str],
-    send_item_request: Dict[str, str],
+    user_a: JSON,
+    user_a_items: List[JSON],
+    user_b: JSON,
+    send_item_request: JSON,
     expected_status: int,
     database: Database,
 ) -> None:
@@ -501,6 +503,7 @@ async def test_send_item(
     "user_a, user_a_items, user_b, item_sending, get_item_request, expected_status",
     # fmt: off
     [
+        # Receiving succeeded.
         (
             {
                 "id": 1,
@@ -536,6 +539,8 @@ async def test_send_item(
             },
             status.HTTP_200_OK,
         ),
+
+        # No such user, unauthorized.
         (
             None,
             None,
@@ -548,6 +553,8 @@ async def test_send_item(
             },
             status.HTTP_401_UNAUTHORIZED,
         ),
+
+        # No item sending with such confirmation url.
         (
             {
                 "id": 1,
@@ -581,11 +588,11 @@ async def test_send_item(
 )
 @pytest.mark.asyncio
 async def test_get_item(
-    user_a: Dict[str, str],
-    user_a_items: List[Dict[str, str]],
-    user_b: Dict[str, str],
-    item_sending: Dict[str, str],
-    get_item_request: Dict[str, str],
+    user_a: JSON,
+    user_a_items: List[JSON],
+    user_b: JSON,
+    item_sending: JSON,
+    get_item_request: JSON,
     expected_status: int,
     database: Database,
 ) -> None:
