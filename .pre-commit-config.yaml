@@ -2,6 +2,7 @@ repos:
   - repo: local
     hooks:
     - id: isort
+      args: [--filter-files]
       name: isort
       stages: [commit]
       language: system
@@ -9,13 +10,21 @@ repos:
       types: [python]
 
     - id: black
+      exclude: |
+        (?x)(
+            ^migrations/|
+        )
       name: black
       stages: [commit]
       language: system
-      entry: poetry run black --exclude migrations
+      entry: poetry run black
       types: [python]
 
     - id: flake8
+      exclude: |
+        (?x)(
+            ^migrations/|
+        )
       name: flake8
       stages: [commit]
       language: system
@@ -23,25 +32,10 @@ repos:
       types: [python]
 
     - id: mypy
+      args: [--show-error-codes]
       name: mypy
       stages: [commit]
       language: system
       entry: poetry run mypy
       types: [python]
       require_serial: true
-
-    - id: pytest
-      name: pytest
-      stages: [commit]
-      language: system
-      entry: poetry run pytest
-      types: [python]
-      pass_filenames: false
-
-    - id: pytest-cov
-      name: pytest
-      stages: [push]
-      language: system
-      entry: poetry run pytest
-      types: [python]
-      pass_filenames: false

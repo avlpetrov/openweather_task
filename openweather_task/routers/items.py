@@ -10,7 +10,7 @@ from openweather_task.schemas import (
     CreateItemResponse,
     DeleteItemRequest,
     DeleteItemResponse,
-    Item,
+    ItemSchema,
 )
 
 router = APIRouter()
@@ -67,9 +67,9 @@ async def delete_item(request: DeleteItemRequest) -> JSONResponse:
 @router.get(
     "/items",
     status_code=status.HTTP_200_OK,
-    response_model=List[Item],
+    response_model=List[ItemSchema],
 )
-async def list_items(token: str) -> List[Item]:
+async def list_items(token: str) -> List[ItemSchema]:
     user = await UserModel.get_authorized(token)
     if user:
         items = await ItemModel.list(user_id=user["id"])

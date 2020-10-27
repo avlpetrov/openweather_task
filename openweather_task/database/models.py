@@ -1,14 +1,14 @@
 import secrets
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Any, List, Mapping, Optional
 
 import sqlalchemy
-from databases.backends.postgres import Record
 from sqlalchemy import ForeignKey, and_, select
 from sqlalchemy.ext.declarative import declarative_base
 
 from openweather_task.config import TOKEN_BYTES_LENGTH, TOKEN_TTL_SECONDS
 from openweather_task.database import database, metadata
+from openweather_task.schemas import ItemSchema
 
 Base = declarative_base()
 
@@ -16,7 +16,7 @@ Base = declarative_base()
 Token = str
 
 
-class User(Base):
+class User(Base):  # type: ignore
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
     login = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
@@ -36,7 +36,7 @@ users = sqlalchemy.Table(
 )
 
 
-class Item(Base):
+class Item(Base):  # type: ignore
     __tablename__ = "items"
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, index=True)
     user_id = sqlalchemy.Column(
@@ -97,8 +97,10 @@ class UserModel:
             await database.execute(set_token_query)
             return token
 
+        return None
+
     @classmethod
-    async def get_authorized(cls, token: Token) -> Optional[Record]:
+    async def get_authorized(cls, token: Token) -> Optional[Mapping[str, Any]]:
         select_user_query = users.select().where(
             and_(users.c.token == token, datetime.now() < users.c.token_expiration_time)
         )
@@ -114,7 +116,7 @@ class ItemModel:
         return item_id
 
     @classmethod
-    async def get(cls, user_id: int, name: str) -> Optional[Record]:
+    async def get(cls, user_id: int, name: str) -> Optional[Mapping[str, Any]]:
         select_item_query = items.select().where(
             and_(items.c.user_id == user_id, items.c.name == name)
         )
@@ -130,7 +132,7 @@ class ItemModel:
         return deleted_item_id
 
     @classmethod
-    async def list(cls, user_id: int) -> List[Item]:
+    async def list(cls, user_id: int) -> List[ItemSchema]:
         list_items_query = (
             select([items.c.id, items.c.name])
             .where(items.c.user_id == user_id)

@@ -20,7 +20,7 @@ def docker() -> dockerlib.APIClient:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def postgres_server(docker: dockerlib.APIClient) -> None:
+def postgres_server(docker: dockerlib.APIClient):
     docker.pull(POSTGRES_DOCKER_IMAGE)
     container = docker.create_container(
         image=POSTGRES_DOCKER_IMAGE,
@@ -41,7 +41,7 @@ def postgres_server(docker: dockerlib.APIClient) -> None:
 
 
 @pytest.fixture
-async def database() -> Database:
+async def database():
     db = Database(POSTGRES_TEST_SERVER_URI)
     await db.connect()
     yield db

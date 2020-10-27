@@ -11,7 +11,7 @@ __all__ = [
     "CreateItemResponse",
     "DeleteItemRequest",
     "DeleteItemResponse",
-    "Item",
+    "ItemSchema",
 ]
 
 
@@ -77,7 +77,7 @@ class DeleteItemResponse(BaseModel):
         orm_mode = True
 
 
-class Item(BaseModel):
+class ItemSchema(BaseModel):
     id: int
     name: str
 
