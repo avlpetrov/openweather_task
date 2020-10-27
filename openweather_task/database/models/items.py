@@ -203,9 +203,9 @@ class SendingModel:
             to_user_id=sending["to_user_id"],
             item_id=sending["item_id"],
         )
-        deleted_sending_id = await cls.delete(sending["id"])
+        deleted_sending_id = await cls.delete(sending["item_id"])
 
-        if transferred_item_id == item_id and deleted_sending_id == sending["id"]:
+        if transferred_item_id == item_id and deleted_sending_id:
             await transaction.commit()
             return SendingStatus.COMPLETED
 
@@ -260,12 +260,12 @@ class SendingModel:
         return sending
 
     @classmethod
-    async def delete(cls, sending_id: int) -> int:
+    async def delete(cls, item_id: int) -> int:
 
         delete_sending_query = (
             sendings.delete()
             .returning(sendings.c.id)
-            .where(sendings.c.id == sending_id)
+            .where(sendings.c.item_id == item_id)
         )
 
         deleted_sending_id = await database.execute(delete_sending_query)
