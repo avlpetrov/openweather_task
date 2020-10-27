@@ -35,6 +35,10 @@ async def register_user(request: RegisterUserRequest) -> RegisterUserResponse:
     "/login",
     status_code=status.HTTP_201_CREATED,
     response_model=AuthorizeUserResponse,
+    description="""
+    Authorizes user, returns temporary token.
+    Default expiration time: 24 hours.
+    """
 )
 async def login_user(request: AuthorizeUserRequest) -> AuthorizeUserResponse:
     token = await UserModel.authorize(request.login, request.password)

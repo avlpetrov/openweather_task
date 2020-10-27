@@ -27,6 +27,9 @@ router = APIRouter()
     "/items/new",
     status_code=status.HTTP_201_CREATED,
     response_model=CreateItemResponse,
+    description="""
+    Creates item for authorized user.
+    """
 )
 async def create_item(request: CreateItemRequest) -> CreateItemResponse:
     user = await UserModel.get_authorized(request.token)
@@ -49,6 +52,9 @@ async def create_item(request: CreateItemRequest) -> CreateItemResponse:
 @router.delete(
     "/items/{id}",
     response_model=DeleteItemResponse,
+    description="""
+    Deletes specified item.
+    """
 )
 async def delete_item(request: DeleteItemRequest) -> JSONResponse:
     user = await UserModel.get_authorized(request.token)
@@ -75,6 +81,9 @@ async def delete_item(request: DeleteItemRequest) -> JSONResponse:
     "/items",
     status_code=status.HTTP_200_OK,
     response_model=List[ItemSchema],
+    description="""
+    Returns items listing of authorized user.
+    """
 )
 async def list_items(token: str) -> List[ItemSchema]:
     user = await UserModel.get_authorized(token)
@@ -92,6 +101,9 @@ async def list_items(token: str) -> List[ItemSchema]:
     "/send",
     status_code=status.HTTP_201_CREATED,
     response_model=SendItemResponse,
+    description="""
+    Initiates item sending, returns confirmation link for item receiving.
+    """,
 )
 async def send_item(request: SendItemRequest) -> SendItemResponse:
     sender = await UserModel.get_authorized(request.token)
@@ -129,6 +141,10 @@ async def send_item(request: SendItemRequest) -> SendItemResponse:
 @router.get(
     "/get/{confirmation_url}",
     status_code=status.HTTP_200_OK,
+    description="""
+    Reassigns item to authorized user via confirmation URL.
+    Returns confirmation message of assignment.
+    """,
 )
 async def get_item(id: int, confirmation_url: str, token: str) -> JSONResponse:  # noqa
     user = await UserModel.get_authorized(token)
