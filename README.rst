@@ -2,6 +2,7 @@ OpenWeather Task
 ================
 | Simple CRUDL API for interacting with users and their items.
 | User credentials/tokens stored and transferred unencrypted for the sake of simplicity.
+| Made for OpenWeather company as a test assignment.
 
 API
 ----------
